@@ -1,0 +1,109 @@
+class Vehiculo
+{
+	string patente;
+	double velocidad;
+	bool esOficial;
+	
+	public Vehiculo(string patente,double velocidad, bool esOficial)
+	{
+		this.patente = patente;
+		this.velocidad = velocidad;
+		this.esOficial = esOficial;
+	}
+	public bool VerificarVelocidadInfractor()
+	{
+		bool aux = false;
+		if( !(velocidad >= 50 && velocidad <= 90) || !esOficial)
+		{
+			aux = true;
+		}
+		return aux;
+	}
+}
+
+class ControlRadar
+{
+	int cantVehiculos;
+	Vehiculo[] infracciones;
+
+	public void AgregarControl(string patente, double velocidad, bool esOficial)
+	{
+		Vehiculo v = new Vehiculo(patente,velocidad,esOficial);
+		if(v.VerificarVelocidadInfractor())
+		{
+			infracciones[cantVehiculos] = v;
+			cantVehiculos++; 
+		}
+	}
+	public Vehiculo VerVehiculosInfractores(int i)
+	{
+		return infracciones[i];
+	}
+	public void Ordenar()
+	{
+		int i, j;
+		Vehiculo aux=null;
+		for(i=0;i< cantVehiculos - 1;i++)
+		{
+			for(j = i+1; j < cantVehiculos; j++)
+			{
+				if(infracciones[i] > infracciones[j])
+				{
+					aux = infracciones[i];
+					infracciones[i] = infracciones[j];
+					infracciones[j] = aux;
+				}
+			}
+		}
+	}
+	public Vehiculo Buscar(string patente)
+	{
+		int pos = -1, i = 0;
+		while(pos == -1 && i < cantVehiculos)
+		{
+			if(infracciones[i] == patente)
+			{
+				pos = i;
+			}
+		}
+		return infracciones[pos];
+	}
+}
+-------------------------------------------------------------------
+BOTONES
+class FormPrincipal {
+...
+	ControlRadar control;
+...
+	private void btnRegVehiculo(...)
+	{
+		FormDatos fDatos = new FormDatos();
+		while(fDatos.ShowDialog() == DialogResult.Ok)
+		{
+			control.AgregarControl(fDatos.tbPatente.Text,Convert.toDouble(fDatos.tbVelocidad.Text),fDatos.rbOficial.Checked);
+		}
+		fDatos.Dispose();
+	}
+	private void btnListInfractores(...)
+	{
+		control.Ordenar();
+		for(int i = 0; i < control.cantVehiculos;i++)
+		{
+			listBox.Item.Add(VerVehiculosInfractores(i).patente + "Velocidad: " + VerVehiculosInfractores(i).velocidad.ToString());
+		}
+	}
+	private void btnBuscar(...)
+	{
+		Vehiculo buscado = control.Buscar(tbPatente.Text);
+		if(buscado)
+		{
+			MessagBox msg;
+			msg.Show("Encontrado! Velocidad: " + buscado.velocidad.ToString("00.00"));
+		}
+		else
+		{	
+			MessageBox msg;
+			msg.Show("No encontrado");
+		}
+	}
+}
